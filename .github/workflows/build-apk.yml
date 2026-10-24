@@ -1,5 +1,4 @@
-
-name: Build APK
+name: Build eNet OCR Pro APK
 
 on:
   workflow_dispatch:
@@ -10,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,23 +19,26 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Unzip Android source
+      - name: Check source ZIP
+        run: test -f enet-ocr-pro-ai-upgraded.zip
+
+      - name: Extract Android source
+        run: unzip -oq enet-ocr-pro-ai-upgraded.zip -d .
+
+      - name: Install Gradle 8.10.2
         run: |
-          unzip -oq enet-ocr-android-source-chatgpt.zip
-          ls -la enet-ocr-android
+          curl -fsSL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o "$RUNNER_TEMP/gradle.zip"
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gradle-8.10.2/bin" >> "$GITHUB_PATH"
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.10.2'
-
-      - name: Build APK
+      - name: Build debug APK
         working-directory: enet-ocr-android
-        run: gradle assembleDebug
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: eNet-OCR-Pro-APK
-          path: enet-ocr-android/app/build/outputs/apk/debug/*.apk
+          name: eNet-OCR-Pro-AI-APK
+          path: enet-ocr-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
           
