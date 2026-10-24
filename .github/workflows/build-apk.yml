@@ -23,20 +23,21 @@ jobs:
 
       - name: Unzip Android source
         run: |
-          ls -la
           unzip -oq enet-ocr-android-source-chatgpt.zip
+          ls -la enet-ocr-android
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
 
       - name: Build APK
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        working-directory: enet-ocr-android
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: eNet-OCR-Pro-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: enet-ocr-android/app/build/outputs/apk/debug/*.apk
           
